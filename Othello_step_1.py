@@ -300,6 +300,8 @@ while not othello_game.is_game_over:
             othello_game.place_pawn(
                 x_pos, y_pos, othello_board, othello_game.active_player)
 
+
+
     # Second player / bot logic goes here
     else:
         valid_moves = otherBot.check_valid_moves(
