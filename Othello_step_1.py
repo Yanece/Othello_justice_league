@@ -1,4 +1,4 @@
-   import random
+ import random
 
 # Object used to create new boards
 
