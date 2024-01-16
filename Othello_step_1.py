@@ -288,22 +288,18 @@ otherBot = Bot("joueur 2")
 
 # Loop until the game is over
 while not othello_game.is_game_over:
-    # First player / bot logic goes here
-    if (othello_game.active_player == "⚫"):
-        valid_moves = myBot.check_valid_moves(
-            othello_board, othello_game.active_player)
-
-        if valid_moves:
-            # Choose a move randomly from the list of valid moves
-            chosen_move = random.choice(valid_moves)
-            x_pos, y_pos = chosen_move
-            othello_game.place_pawn(
-                x_pos, y_pos, othello_board, othello_game.active_player)
-
-
+    # First player logic goes here
+    if othello_game.active_player == "⚫":
+        # User input for first player
+        move_coordinates = [0, 0]
+        move_coordinates[0] = int(input("Coordonnées en X: "))
+        move_coordinates[1] = int(input("Coordonnées en Y: "))
+        othello_game.place_pawn(
+            move_coordinates[0], move_coordinates[1], othello_board, othello_game.active_player)
 
     # Second player / bot logic goes here
     else:
+        # Bot logic for second player
         valid_moves = otherBot.check_valid_moves(
             othello_board, othello_game.active_player)
 
