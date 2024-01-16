@@ -286,7 +286,7 @@ othello_board.draw_board("Content")
 myBot = Bot("Justice league")
 otherBot = Bot("joueur 2")
 
-# Loop until the game is over
+# Loop until the game is  over
 while not othello_game.is_game_over:
     # First player / bot logic goes here
     if (othello_game.active_player == "⚫"):
