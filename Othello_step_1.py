@@ -260,16 +260,27 @@ class Bot:
         self.name = name
 
     # BOT FUNCTIONS
-
     def check_valid_moves(self, board, color):
         valid_moves = []
+        max_pawns_flipped = 0
+        best_move = []
+
         for tile in board.board:
             x_pos, y_pos = tile.x_pos, tile.y_pos
 
             if board.is_tile_empty(x_pos, y_pos):
-                if board.is_legal_move(x_pos, y_pos, color):
-                    valid_moves.append((x_pos, y_pos))
-        return valid_moves
+                move_result = board.is_legal_move(x_pos, y_pos, color)
+                if move_result:
+                    # Calculer le score total pour ce mouvement
+                    total_flipped = sum([result[0] for result in move_result])
+                    if total_flipped > max_pawns_flipped:
+                        max_pawns_flipped = total_flipped
+                        best_move = [[x_pos, y_pos, total_flipped]]
+                    elif total_flipped == max_pawns_flipped  :
+                        best_move.append([[x_pos, y_pos, total_flipped]])
+                    
+
+        return random.choice(best_move)
 
 
 # Create a new board & a new game instances
@@ -302,10 +313,5 @@ while not othello_game.is_game_over:
         # Bot logic for second player
         valid_moves = otherBot.check_valid_moves(
             othello_board, othello_game.active_player)
-
-        if valid_moves:
-            # Choose a move randomly from the list of valid moves
-            chosen_move = random.choice(valid_moves)
-            x_pos, y_pos = chosen_move
-            othello_game.place_pawn(
-                x_pos, y_pos, othello_board, othello_game.active_player)
+        othello_game.place_pawn(
+                valid_moves[0],valid_moves[1] , othello_board, othello_game.active_player)
