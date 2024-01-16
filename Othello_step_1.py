@@ -275,9 +275,9 @@ class Bot:
                     total_flipped = sum([result[0] for result in move_result])
                     if total_flipped > max_pawns_flipped:
                         max_pawns_flipped = total_flipped
-                        best_move = [[x_pos, y_pos, total_flipped]]
+                        best_move = [ [x_pos, y_pos, total_flipped]]
                     elif total_flipped == max_pawns_flipped  :
-                        best_move.append([[x_pos, y_pos, total_flipped]])
+                        best_move.append([x_pos, y_pos, total_flipped])
                     
 
         return random.choice(best_move)
@@ -311,7 +311,7 @@ while not othello_game.is_game_over:
     # Second player / bot logic goes here
     else:
         # Bot logic for second player
-        valid_moves = otherBot.check_valid_moves(
+        move_coordinates = otherBot.check_valid_moves(
             othello_board, othello_game.active_player)
         othello_game.place_pawn(
-                valid_moves[0],valid_moves[1] , othello_board, othello_game.active_player)
+                move_coordinates[0],move_coordinates[1] , othello_board, othello_game.active_player)
