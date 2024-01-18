@@ -27,3 +27,19 @@ class Bot:
 
         return random.choice(best_move)
 
+
+
+def check_valid moves(self):
+    new_board = Board(8)
+    new_board.create_board()
+    matrice_list = [100, -20, 10, 5, 5, 10, -20, 100,
+        -20, -50, -2, -2, -2, -2, -50, -20,
+        10, -2, 8, 1, 1, 8, -2, 10,
+        5, -2, 1, 2, 2, 1, -2, 5,
+        5, -2, 1, 2, 2, 1, -2, 5,
+        10, -2, 8, 1, 1, 8, -2, 10,
+        -20, -50, -2, -2, -2, -2, -50, -20,
+        100, -20, 10, 5, 5, 10, -20, 100]
+    for current_tile in range(new_board.board):
+        new_board.board[current_tile].weight = matrice_list[current_tile]
+

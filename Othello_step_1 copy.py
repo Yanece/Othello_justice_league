@@ -261,13 +261,9 @@ class Bot:
 
     # BOT FUNCTIONS
     def check_valid_moves(self, board, color):
-        new_board = Board(8)
-        new_board.create_board()
         valid_moves = []
-        max_pawns_flipped = -999
+        max_pawns_flipped = 0
         best_move = []
-        tile_index = 0
-        self.board_weight(new_board)
 
         for tile in board.board:
             x_pos, y_pos = tile.x_pos, tile.y_pos
@@ -276,29 +272,33 @@ class Bot:
                 move_result = board.is_legal_move(x_pos, y_pos, color)
                 if move_result:
                     # Calculer le score total pour ce mouvement
-                    total_flipped = sum([result[0] for result in move_result]) + new_board.board[tile_index].weight
+                    total_flipped = sum([result[0] for result in move_result]) + new_board.board[current_tile].weight
                     if total_flipped > max_pawns_flipped:
                         max_pawns_flipped = total_flipped
                         best_move = [ [x_pos, y_pos, total_flipped]]
                     elif total_flipped == max_pawns_flipped  :
-                        best_move.append([x_pos, y_pos, total_flipped])
-            tile_index += 1
+                        best_move = [x_pos, y_pos, total_flipped]
                     
 
         return random.choice(best_move)
 
-    def board_weight(self, new_board):
-        
-        matrice_list = [100, -20, 10, 5, 5, 10, -20, 100,
-            -20, -50, -2, -2, -2, -2, -50, -20,
-            10, -2, 8, 1, 1, 8, -2, 10,
-            5, -2, 1, 2, 2, 1, -2, 5,
-            5, -2, 1, 2, 2, 1, -2, 5,
-            10, -2, 8, 1, 1, 8, -2, 10,
-            -20, -50, -2, -2, -2, -2, -50, -20,
-            100, -20, 10, 5, 5, 10, -20, 100]
-        for current_tile in range(len(new_board.board)):
-            new_board.board[current_tile].weight = matrice_list[current_tile]
+
+
+def check_valid_moves(self):
+    new_board = Board(8)
+    new_board.create_board()
+    matrice_list = [100, -20, 10, 5, 5, 10, -20, 100,
+        -20, -50, -2, -2, -2, -2, -50, -20,
+        10, -2, 8, 1, 1, 8, -2, 10,
+        5, -2, 1, 2, 2, 1, -2, 5,
+        5, -2, 1, 2, 2, 1, -2, 5,
+        10, -2, 8, 1, 1, 8, -2, 10,
+        -20, -50, -2, -2, -2, -2, -50, -20,
+        100, -20, 10, 5, 5, 10, -20, 100]
+
+    for current_tile in range(new_board.board):
+        new_board.board[current_tile].weight = matrice_list[current_tile]
+
 
 # Create a new board & a new game instances
 othello_board = Board(8)
@@ -319,8 +319,9 @@ while not othello_game.is_game_over:
     # First player logic goes here
     if othello_game.active_player == "⚫":
         # User input for first player
-        move_coordinates = otherBot.check_valid_moves(
-            othello_board, othello_game.active_player)
+        move_coordinates = [0, 0]
+        move_coordinates[0] = int(input("Coordonnées en X: "))
+        move_coordinates[1] = int(input("Coordonnées en Y: "))
         othello_game.place_pawn(
             move_coordinates[0], move_coordinates[1], othello_board, othello_game.active_player)
 
