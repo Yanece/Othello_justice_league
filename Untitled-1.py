@@ -1,5 +1,4 @@
 # À l'intérieur de la classe Bot:
-yane je veux manger mac do
 # ...
 
 def check_valid_moves(self, board, color):
