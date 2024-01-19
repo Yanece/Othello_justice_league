@@ -1,45 +1,44 @@
+class OthelloBot:
+    def __init__(self, board):
+        self.board = board  # Suppose that board is a 2D list representing the game state
+        self.my_color = "X"  # Or "O" depending on the bot's color
+        self.opponent_color = "O" if self.my_color == "X" else "X"
 
+    def is_corner(self, x, y):
+        return (x, y) in [(0, 0), (0, 7), (7, 0), (7, 7)]
+    
+    def get_valid_moves(self):
+        # Your existing method to get the list of valid moves
+        # Should return a list of tuples (x, y) representing valid move coordinates
+        pass
 
-class Bot:
-    def __init__(self, name):
-        self.name = name
+    def move_gives_corner(self, x, y):
+        # Check if the move at (x, y) would allow the opponent to take a corner
+        # This requires game logic to see if placing a piece gives access to a corner
+        pass
 
-    # BOT FUNCTIONS
-    def check_valid_moves(self, board, color):
-        valid_moves = []
-        max_pawns_flipped = 0
-        best_move = []
+    def select_move(self):
+        valid_moves = self.get_valid_moves()
+        corner_moves = [move for move in valid_moves if self.is_corner(*move)]
+        
+        if corner_moves:
+            return corner_moves[0]  # Prioritize taking a corner if it's safe
+        
+        # Filter out moves that give the opponent a corner
+        non_risky_moves = [move for move in valid_moves if not self.move_gives_corner(*move)]
+        
+        if non_risky_moves:
+            # Select the best move from non-risky moves based on your strategy
+            # For simplicity, just return the first non-risky move
+            return non_risky_moves[0]
+        
+        # If there are no non-risky moves, select the least damaging move
+        return valid_moves[0] if valid_moves else None
 
-        for tile in board.board:
-            x_pos, y_pos = tile.x_pos, tile.y_pos
-
-            if board.is_tile_empty(x_pos, y_pos):
-                move_result = board.is_legal_move(x_pos, y_pos, color)
-                if move_result:
-                    # Calculer le score total pour ce mouvement
-                    total_flipped = sum([result[0] for result in move_result])
-                    if total_flipped > max_pawns_flipped:
-                        max_pawns_flipped = total_flipped
-                        best_move = [[x_pos, y_pos, total_flipped]]
-                    elif total_flipped == max_pawns_flipped  :
-                        best_move.append([[x_pos, y_pos, total_flipped]])
-                    
-
-        return random.choice(best_move)
-
-
-
-def check_valid moves(self):
-    new_board = Board(8)
-    new_board.create_board()
-    matrice_list = [100, -20, 10, 5, 5, 10, -20, 100,
-        -20, -50, -2, -2, -2, -2, -50, -20,
-        10, -2, 8, 1, 1, 8, -2, 10,
-        5, -2, 1, 2, 2, 1, -2, 5,
-        5, -2, 1, 2, 2, 1, -2, 5,
-        10, -2, 8, 1, 1, 8, -2, 10,
-        -20, -50, -2, -2, -2, -2, -50, -20,
-        100, -20, 10, 5, 5, 10, -20, 100]
-    for current_tile in range(new_board.board):
-        new_board.board[current_tile].weight = matrice_list[current_tile]
-
+# Usage
+# board = ... (initialize or get the current state of the board)
+# bot = OthelloBot(board)
+# move = bot.select_move()
+# if move:
+#     x, y = move
+#     # Make the move on the board
