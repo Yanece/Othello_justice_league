@@ -295,7 +295,6 @@ def check_valid_moves(self):
         10, -2, 8, 1, 1, 8, -2, 10,
         -20, -50, -2, -2, -2, -2, -50, -20,
         100, -20, 10, 5, 5, 10, -20, 100]
-    ]
 
     for current_tile in range(new_board.board):
         new_board.board[current_tile].weight = matrice_list[current_tile]

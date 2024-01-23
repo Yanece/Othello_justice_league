@@ -1,4 +1,6 @@
 import random
+import copy
+from copy import deepcopy
 # Object used to create new boards
 
 
@@ -299,6 +301,22 @@ class Bot:
         for current_tile in range(len(new_board.board)):
             new_board.board[current_tile].weight = matrice_list[current_tile]
 
+    def check_for_valid_moves(self, main_board, main_game, depth):
+        playable_moves = [[2, 4, 7], [6, 3, 7]]  # Exemple de mouvements possibles
+
+        if depth > 0:
+            for move in playable_moves:
+                new_board = deepcopy(main_board)
+                new_game = deepcopy(main_game)
+
+                main_game.place_pawn(move[0], move[1], new_board, new_game.active_player)
+                opponent_points = self.check_for_valid_moves(new_board, new_game, depth - 1)
+                move[2] -= opponent_points
+
+            best_move = max(playable_moves, key=lambda x: x[2])
+            return [best_move[0], best_move[1]]
+
+        return random.choice(playable_moves)
     
     def evaluate_move(self, board, x, y, color):
         score = 0
