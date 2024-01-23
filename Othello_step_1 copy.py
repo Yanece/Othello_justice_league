@@ -1,5 +1,8 @@
 import random
-
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from copy import deepcopy
 # Object used to create new boards
 
 
@@ -258,12 +261,67 @@ class Game:
 class Bot:
     def __init__(self, name):
         self.name = name
+        self.classifier = RandomForestClassifier()
+        self.classifier = RandomForestClassifier()
+
+    def generate_training_data(self, board, color, num_games=100):
+        training_data = simulate_game(board, color, self)
+
+        return training_data
+
+    def train_model(self, training_data):
+        X = [entry['board_position'] for entry in training_data]
+        y = [entry['decision'] for entry in training_data]
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        self.classifier.fit(X_train, y_train)
+
+
+        predictions = self.classifier.predict(X_test)
+        accuracy = accuracy_score(y_test, predictions)
+        print(f"Précision du modèle : {accuracy}")
+
+    def make_decision(self, board):
+
+        decision = random.choice(['left', 'right', 'up', 'down'])
+
+        return decision
+
+    def generate_training_data(self, board, color, num_games=100):
+        training_data = []
+
+        for _ in range(num_games):
+            
+            pass
+
+        return training_data
+
+    def train_model(self, training_data):
+        X = [entry['board_position'] for entry in training_data]
+        y = [entry['decision'] for entry in training_data]
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        self.classifier.fit(X_train, y_train)
+
+        predictions = self.classifier.predict(X_test)
+        accuracy = accuracy_score(y_test, predictions)
+        print(f"Précision du modèle : {accuracy}")
+
+    def make_decision(self, board):
+        decision = random.choice(['left', 'right', 'up', 'down'])
+
+        return decision
 
     # BOT FUNCTIONS
     def check_valid_moves(self, board, color):
+        new_board = Board(8)
+        new_board.create_board()
         valid_moves = []
-        max_pawns_flipped = 0
+        max_pawns_flipped = -999
         best_move = []
+        tile_index = 0
+        self.board_weight(new_board)
 
         for tile in board.board:
             x_pos, y_pos = tile.x_pos, tile.y_pos
@@ -272,22 +330,20 @@ class Bot:
                 move_result = board.is_legal_move(x_pos, y_pos, color)
                 if move_result:
                     # Calculer le score total pour ce mouvement
-                    total_flipped = sum([result[0] for result in move_result]) + new_board.board[current_tile].weight
+                    total_flipped = sum([result[0] for result in move_result]) + new_board.board[tile_index].weight
                     if total_flipped > max_pawns_flipped:
                         max_pawns_flipped = total_flipped
                         best_move = [ [x_pos, y_pos, total_flipped]]
                     elif total_flipped == max_pawns_flipped  :
-                        best_move = [x_pos, y_pos, total_flipped]
+                        best_move.append([x_pos, y_pos, total_flipped])
+            tile_index += 1
                     
 
         return random.choice(best_move)
 
-
-
-def check_valid_moves(self):
-    new_board = Board(8)
-    new_board.create_board()
-    matrice_list = [100, -20, 10, 5, 5, 10, -20, 100,
+    def board_weight(self, new_board):
+        
+        matrice_list = [100, -20, 10, 5, 5, 10, -20, 100,
         -20, -50, -2, -2, -2, -2, -50, -20,
         10, -2, 8, 1, 1, 8, -2, 10,
         5, -2, 1, 2, 2, 1, -2, 5,
@@ -295,11 +351,51 @@ def check_valid_moves(self):
         10, -2, 8, 1, 1, 8, -2, 10,
         -20, -50, -2, -2, -2, -2, -50, -20,
         100, -20, 10, 5, 5, 10, -20, 100]
+        for current_tile in range(len(new_board.board)):
+            new_board.board[current_tile].weight = matrice_list[current_tile]
 
-    for current_tile in range(new_board.board):
-        new_board.board[current_tile].weight = matrice_list[current_tile]
+    def check_for_valid_moves(self, main_board, main_game, depth):
+        playable_moves = [[2, 4, 7], [6, 3, 7]]  # Exemple de mouvements possibles
 
+        if depth > 0:
+            for move in playable_moves:
+                new_board = deepcopy(main_board)
+                new_game = deepcopy(main_game)
 
+                main_game.place_pawn(move[0], move[1], new_board, new_game.active_player)
+                opponent_points = self.check_for_valid_moves(new_board, new_game, depth - 1)
+                move[2] -= opponent_points
+
+            best_move = max(playable_moves, key=lambda x: x[2])
+            return [best_move[0], best_move[1]]
+
+        return random.choice(playable_moves)
+    
+    def evaluate_move(self, board, x, y, color):
+        score = 0
+        corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
+        
+        # Score for capturing corners
+        if (x, y) in corners:
+            score += 100
+        
+        # Score for mobility
+        score += self.calculate_mobility(board, color)
+        
+        # Score for flipping opponent's tiles
+        flipping_score = len(board.get_flipped_tiles(x, y, color))
+        score += flipping_score
+        
+        return score
+
+    def calculate_mobility(self, board, color):
+        mobility = 0
+        for x in range(8):
+            for y in range(8):
+                if board.is_legal_move(x, y, color):
+                    mobility += 1
+        return mobility
+    
 # Create a new board & a new game instances
 othello_board = Board(8)
 othello_game = Game()
@@ -319,9 +415,8 @@ while not othello_game.is_game_over:
     # First player logic goes here
     if othello_game.active_player == "⚫":
         # User input for first player
-        move_coordinates = [0, 0]
-        move_coordinates[0] = int(input("Coordonnées en X: "))
-        move_coordinates[1] = int(input("Coordonnées en Y: "))
+        move_coordinates = otherBot.check_valid_moves(
+            othello_board, othello_game.active_player)
         othello_game.place_pawn(
             move_coordinates[0], move_coordinates[1], othello_board, othello_game.active_player)
 
@@ -336,4 +431,55 @@ while not othello_game.is_game_over:
 
 
 
+#Jeux 100 
 
+def play_games(number_of_games):
+    white_victories = 0
+    black_victories = 0
+    
+    for current_game in range(number_of_games):
+        # Create a new board & a new game instances
+        othello_board = Board(8)
+        othello_game = Game()
+
+        # Fill the board with tiles
+        othello_board.create_board()
+
+        # Draw the board
+        othello_board.draw_board("Content")
+
+        # Create 2 bots
+        myBot = Bot("Justice league")
+        otherBot = Bot("joueur 2")
+
+        # Loop until the game is over
+        while not othello_game.is_game_over:
+            # First player logic goes here
+            if othello_game.active_player == "⚫":
+                # User input for first player
+                move_coordinates = otherBot.check_valid_moves(
+                    othello_board, othello_game.active_player)
+                othello_game.place_pawn(
+                    move_coordinates[0], move_coordinates[1], othello_board, othello_game.active_player)
+
+            # Second player / bot logic goes here
+            else:
+                # Bot logic for second player
+                move_coordinates = otherBot.check_valid_moves(
+                    othello_board, othello_game.active_player)
+                othello_game.place_pawn(
+                        move_coordinates[0],move_coordinates[1] , othello_board, othello_game.active_player)
+
+            
+        if(othello_game.winner == "⚫"):
+            black_victories += 1
+        elif(othello_game.winner == "⚪"):
+            white_victories += 1
+        
+    
+    print("End of the games, showing scores: ")
+    print("Black player won " + str(black_victories) + " times")
+    print("White player won " + str(white_victories) + " times")
+        
+
+play_games(100)

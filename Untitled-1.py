@@ -155,3 +155,77 @@ for   play_move :
     sauce[2] -= opponent_points
 
 return random.choice(playable_moves)
+
+
+
+
+def simulate_game(board, color, bot):
+    training_data = []
+    
+    while not game_over(board):
+        if active_player(board) == color:
+            # C'est le tour de ton bot, utilise ton modèle pour prendre une décision
+            move = bot.make_decision(board)
+        else:
+            # C'est le tour de l'adversaire aléatoire
+            valid_moves = get_valid_moves(board, active_player(board))
+            move = random.choice(valid_moves)
+        
+        # Enregistre la position du plateau avant le mouvement
+        board_before_move = copy.deepcopy(board)
+        
+        # Effectue le mouvement
+        place_pawn(move[0], move[1], board, active_player(board))
+        
+        # Enregistre la décision dans training_data
+        training_data.append({
+            'board_position': board_before_move,
+            'decision': move
+        })
+    
+    return training_data
+
+
+self.classifier = RandomForestClassifier()
+
+    def generate_training_data(self, board, color, num_games=100):
+        # Génère les données d'entraînement en jouant plusieurs parties
+        # Les données peuvent inclure les positions du plateau et les décisions prises
+
+        # Exemple basique : génère des données aléatoires
+        training_data = simulate_game(board, color, self)
+
+        return training_data
+
+
+
+
+
+
+
+
+
+    def train_model(self, training_data):
+        # Sépare les données en entrées (positions du plateau) et sorties (décisions prises)
+        X = [entry['board_position'] for entry in training_data]
+        y = [entry['decision'] for entry in training_data]
+
+        # Divise les données en ensembles d'entraînement et de test
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        # Entraîne le modèle
+        self.classifier.fit(X_train, y_train)
+
+        # Évalue la précision du modèle
+        predictions = self.classifier.predict(X_test)
+        accuracy = accuracy_score(y_test, predictions)
+        print(f"Précision du modèle : {accuracy}")
+
+    def make_decision(self, board):
+        # Utilise le modèle pour prendre une décision basée sur la position actuelle du plateau
+        # Retourne la meilleure décision possible
+
+        # Exemple basique : prend une décision aléatoire
+        decision = random.choice(['left', 'right', 'up', 'down'])
+
+        return decision
