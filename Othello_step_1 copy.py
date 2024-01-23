@@ -395,7 +395,52 @@ class Bot:
                 if board.is_legal_move(x, y, color):
                     mobility += 1
         return mobility
-    
+
+class CrotoBotEz:
+    def __init__(self):
+        self.coners = [[0, 0], [7, 0], [0, 7], [7, 7]]
+        self.avoided_tiles = [[1, 0], [0, 1],  [1, 1], [1, 7], [0, 6], [1, 6], [6, 0], [7, 1], [6, 1], [6, 7], [7, 6], [6, 6]]
+
+    # BOT FUNCTIONS
+
+    def check_valid_moves(self, board, game):
+        max_points = -999
+        best_moves = []
+        current_move = []
+
+        for current_tile in board.board:
+            points = 0
+
+            if(board.is_tile_empty):
+                current_move = board.is_legal_move(current_tile.x_pos, current_tile.y_pos, game.active_player)
+                
+                if (current_move != False):
+                    for tiles_to_flip in current_move:
+                        points += tiles_to_flip[0]
+                    
+                    points += self.get_tile_weight(current_tile.x_pos, current_tile.y_pos)
+                    if(points > max_points):
+                        best_moves = [[current_tile.x_pos, current_tile.y_pos]]
+                        max_points = points
+                    elif(points == max_points):
+                        best_moves.append([current_tile.x_pos, current_tile.y_pos])
+
+        return random.choice(best_moves)
+                
+    def get_tile_weight(self, x, y):
+        total_points = 0
+
+        for current_coord in self.coners:
+            if x == current_coord[0] and y == current_coord[1]:
+                total_points += 100
+                break
+            
+        for current_coord in self.avoided_tiles:
+            if x == current_coord[0] and y == current_coord[1]:
+                total_points -= 30
+                break
+        
+        return total_points   
 # Create a new board & a new game instances
 othello_board = Board(8)
 othello_game = Game()
@@ -451,14 +496,14 @@ def play_games(number_of_games):
         # Create 2 bots
         myBot = Bot("Justice league")
         otherBot = Bot("joueur 2")
+        croto_bot = CrotoBotEz()
 
         # Loop until the game is over
         while not othello_game.is_game_over:
             # First player logic goes here
             if othello_game.active_player == "⚫":
                 # User input for first player
-                move_coordinates = otherBot.check_valid_moves(
-                    othello_board, othello_game.active_player)
+                move_coordinates = croto_bot.check_valid_moves(othello_board, othello_game)
                 othello_game.place_pawn(
                     move_coordinates[0], move_coordinates[1], othello_board, othello_game.active_player)
 
