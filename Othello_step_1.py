@@ -1,5 +1,4 @@
 import random
-
 # Object used to create new boards
 
 
@@ -290,16 +289,42 @@ class Bot:
     def board_weight(self, new_board):
         
         matrice_list = [100, -20, 10, 5, 5, 10, -20, 100,
-            -20, -50, -2, -2, -2, -2, -50, -20,
-            10, -2, 8, 1, 1, 8, -2, 10,
-            5, -2, 1, 2, 2, 1, -2, 5,
-            5, -2, 1, 2, 2, 1, -2, 5,
-            10, -2, 8, 1, 1, 8, -2, 10,
-            -20, -50, -2, -2, -2, -2, -50, -20,
-            100, -20, 10, 5, 5, 10, -20, 100]
+        -20, -50, -2, -2, -2, -2, -50, -20,
+        10, -2, 8, 1, 1, 8, -2, 10,
+        5, -2, 1, 2, 2, 1, -2, 5,
+        5, -2, 1, 2, 2, 1, -2, 5,
+        10, -2, 8, 1, 1, 8, -2, 10,
+        -20, -50, -2, -2, -2, -2, -50, -20,
+        100, -20, 10, 5, 5, 10, -20, 100]
         for current_tile in range(len(new_board.board)):
             new_board.board[current_tile].weight = matrice_list[current_tile]
 
+    
+    def evaluate_move(self, board, x, y, color):
+        score = 0
+        corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
+        
+        # Score for capturing corners
+        if (x, y) in corners:
+            score += 100
+        
+        # Score for mobility
+        score += self.calculate_mobility(board, color)
+        
+        # Score for flipping opponent's tiles
+        flipping_score = len(board.get_flipped_tiles(x, y, color))
+        score += flipping_score
+        
+        return score
+
+    def calculate_mobility(self, board, color):
+        mobility = 0
+        for x in range(8):
+            for y in range(8):
+                if board.is_legal_move(x, y, color):
+                    mobility += 1
+        return mobility
+    
 # Create a new board & a new game instances
 othello_board = Board(8)
 othello_game = Game()

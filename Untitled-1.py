@@ -76,3 +76,82 @@ class Bot:
                     mobility += 1
         return mobility
 
+
+
+
+class Bot:
+    def __init__(self, name):
+        self.name = name
+
+    def alpha_beta_search(self, depth, game, alpha, beta, best_move):
+        if depth == 0 or game.is_game_over:
+            return self.evaluate(game), best_move
+
+        legal_moves = self.get_legal_moves(game)
+
+        if game.active_player == "⚪":  # Si c'est le tour du joueur blanc
+            best_score = float('-inf')
+            for move in legal_moves:
+                game.play_move(move)
+                score, _ = self.alpha_beta_search(depth - 1, game, alpha, beta, move)
+                game.undo_move(move)
+
+                if score > best_score:
+                    best_score = score
+                    best_move = move
+
+                alpha = max(alpha, best_score)
+                if beta <= alpha:
+                    break
+
+            return best_score, best_move
+
+        else:  # Si c'est le tour du joueur noir
+            best_score = float('inf')
+            for move in legal_moves:
+                game.play_move(move)
+                score, _ = self.alpha_beta_search(depth - 1, game, alpha, beta, move)
+                game.undo_move(move)
+
+                if score < best_score:
+                    best_score = score
+                    best_move = move
+
+                beta = min(beta, best_score)
+                if beta <= alpha:
+                    break
+
+            return best_score, best_move
+
+    def get_legal_moves(self, game):
+        # Ajoute ici la logique pour obtenir les mouvements légaux dans le jeu
+        pass
+
+    def evaluate(self, game):
+        # Ajoute ici la logique pour évaluer la position du jeu
+        pass
+
+
+
+[500, -150, 30, 10, 10, 30, -150, 500,
+    -150, -250, 0, 0, 0, 0, -250, -150,
+    30, 0, 1, 2, 2, 1, 0, 30,
+    10, 0, 2, 16, 16, 2, 0, 10,
+    10, 0, 2, 16, 16, 2, 0, 10,
+    30, 0, 1, 2, 2, 1, 0, 30,
+    -150, -250, 0, 0, 0, 0, -250, -150,
+    500, -150, 30, 10, 10, 30, -150, 500]
+
+def check_for_valid_moves(self, main_board,main_game, depth)
+from copy inport deepcopy
+
+play_move = [[2, 4, 7],[6, 3, 7]]
+if(depth > 0 ):
+new_board = deepcopy(main_board)
+new_game = deepcopy(main_game)
+for   play_move :
+    main_game.place_pawn(sauce[0], sauce[1], new_board,new_game.active_player)
+    opponent_points = self.check_valid_moves(new_board,new_game)
+    sauce[2] -= opponent_points
+
+return random.choice(playable_moves)
