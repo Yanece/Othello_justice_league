@@ -1,6 +1,7 @@
 import random
 import copy
 from copy import deepcopy
+
 # Object used to create new boards
 
 
@@ -257,10 +258,16 @@ class Game:
 
 
 class Bot:
-    def __init__(self, name):
+    def __init__(self, name, learning_rate=0.1, discount_factor=0.9, exploration_rate=0.2):
         self.name = name
-
+        self.strategy_weight = 1.0
+        self.learning_rate = learning_rate
+        self.discount_factor = discount_factor
+        self.exploration_rate = exploration_rate
+        self.q_table = {}
     # BOT FUNCTIONS
+    
+    
     def check_valid_moves(self, board, color):
         new_board = Board(8)
         new_board.create_board()
@@ -317,18 +324,58 @@ class Bot:
             return [best_move[0], best_move[1]]
 
         return random.choice(playable_moves)
+    def adapt_strategy(self, game_stage):
+        if game_stage == "early":
+            # Stratégie agressive pour le début de la partie
+            self.strategy_weight = 1.5
+        elif game_stage == "mid":
+            # Stratégie équilibrée pour le milieu de la partie
+            self.strategy_weight = 1.0
+        elif game_stage == "late":
+            # Stratégie conservatrice pour la fin de la partie
+            self.strategy_weight = 0.8
+
+    def get_q_value(self, state, action):
+        return self.q_table.get((state, action), 0.0)
+
+    def update_q_value(self, state, action, new_value):
+        current_value = self.q_table.get((state, action), 0.0)
+        self.q_table[(state, action)] = current_value + self.learning_rate * (new_value - current_value)
+
+    def choose_action(self, state, valid_moves):
+        if random.uniform(0, 1) < self.exploration_rate:
+            return random.choice(valid_moves)
+        else:
+            q_values = [self.get_q_value(state, a) for a in valid_moves]
+            max_q_value = max(q_values)
+            best_moves = [move for move, q_value in zip(valid_moves, q_values) if q_value == max_q_value]
+            return random.choice(best_moves)
+
+    def record_learning_data(self, state, action, new_state):
+        # Enregistre l'état actuel, l'action effectuée et le nouvel état atteint
+        reward = self.calculate_reward(new_state)
+        self.update_q_value(state, action, reward)
+
+    def calculate_reward(self, state):
+        # Vous pouvez définir votre propre logique pour calculer la récompense en fonction de l'état
+        # Cela dépend de votre jeu spécifique
+        return 1.0  # Exemple simple : récompense constante
+
+    def choose_move_with_learning(self, state, valid_moves):
+        return self.choose_action(state, valid_moves)
     
     def evaluate_move(self, board, x, y, color):
         score = 0
         corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
-        
+        edges = [(0, 1), (0, 6), (1, 0), (1, 7), (6, 0), (6, 7), (7, 1), (7, 6)]
         # Score for capturing corners
         if (x, y) in corners:
-            score += 100
-        
+            score += 150
+        elif (x, y) in edges:
+            score += 50 
         # Score for mobility
-        score += self.calculate_mobility(board, color)
-        
+        score += 2 * self.calculate_mobility(board, color)
+        score += self.strategy_weight * self.calculate_mobility(board, color)
         # Score for flipping opponent's tiles
         flipping_score = len(board.get_flipped_tiles(x, y, color))
         score += flipping_score
@@ -342,7 +389,32 @@ class Bot:
                 if board.is_legal_move(x, y, color):
                     mobility += 1
         return mobility
-    
+    def get_q_value(self, state, action):
+        return self.q_table.get((state, action), 0.0)
+
+    def update_q_value(self, state, action, new_value):
+        current_value = self.q_table.get((state, action), 0.0)
+        self.q_table[(state, action)] = current_value + self.learning_rate * (new_value - current_value)
+
+    def choose_action(self, state, valid_moves):
+        if random.uniform(0, 1) < self.exploration_rate:
+            return random.choice(valid_moves)
+        else:
+            q_values = [self.get_q_value(state, a) for a in valid_moves]
+            return max(valid_moves, key=lambda a: self.get_q_value(state, a))
+
+    def record_learning_data(self, state, action, new_state):
+        # Enregistre l'état actuel, l'action effectuée et le nouvel état atteint
+        reward = self.calculate_reward(new_state)
+        self.update_q_value(state, action, reward)
+
+    def calculate_reward(self, state):
+        # Vous pouvez définir votre propre logique pour calculer la récompense en fonction de l'état
+        # Cela dépend de votre jeu spécifique
+        return 1.0  # Exemple simple : récompense constante
+
+    def choose_move_with_learning(self, state, valid_moves):
+        return self.choose_action(state, valid_moves)
 class CrotoBotEz:
     def __init__(self):
         self.coners = [[0, 0], [7, 0], [0, 7], [7, 7]]
@@ -453,15 +525,15 @@ def play_games(number_of_games):
             # First player logic goes here
             if othello_game.active_player == "⚫":
                 # User input for first player
-                move_coordinates = croto_bot.check_valid_moves(othello_board, othello_game)
+                move_coordinates = otherBot.check_valid_moves(
+                    othello_board, othello_game.active_player)
                 othello_game.place_pawn(
                     move_coordinates[0], move_coordinates[1], othello_board, othello_game.active_player)
 
             # Second player / bot logic goes here
             else:
                 # Bot logic for second player
-                move_coordinates =   otherBot.check_valid_moves(
-                    othello_board, othello_game.active_player)  
+                move_coordinates =  croto_bot.check_valid_moves(othello_board, othello_game) 
                 othello_game.place_pawn(
                         move_coordinates[0],move_coordinates[1] , othello_board, othello_game.active_player)
             

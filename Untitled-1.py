@@ -229,3 +229,21 @@ self.classifier = RandomForestClassifier()
         decision = random.choice(['left', 'right', 'up', 'down'])
 
         return decision
+     
+     def evaluate_move(self, board, x, y, color):
+    score = 0
+    corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
+
+    # Score for capturing corners
+    if (x, y) in corners:
+        score += 150  # Augmentons la valeur pour les coins
+
+    # Score for mobility
+    score += 2 * self.calculate_mobility(board, color)  # Accordons plus de poids à la mobilité
+
+    # Score for flipping opponent's tiles
+    flipping_score = len(board.get_flipped_tiles(x, y, color))
+    score += flipping_score
+
+    return score
+

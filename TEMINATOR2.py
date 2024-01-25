@@ -259,6 +259,7 @@ class Game:
 class Bot:
     def __init__(self, name):
         self.name = name
+        self.strategy_weight = 1.0
 
     # BOT FUNCTIONS
     def check_valid_moves(self, board, color):
@@ -317,18 +318,28 @@ class Bot:
             return [best_move[0], best_move[1]]
 
         return random.choice(playable_moves)
-    
+    def adapt_strategy(self, game_stage):
+        if game_stage == "early":
+            # Stratégie agressive pour le début de la partie
+            self.strategy_weight = 1.5
+        elif game_stage == "mid":
+            # Stratégie équilibrée pour le milieu de la partie
+            self.strategy_weight = 1.0
+        elif game_stage == "late":
+            # Stratégie conservatrice pour la fin de la partie
+            self.strategy_weight = 0.8
     def evaluate_move(self, board, x, y, color):
         score = 0
         corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
-        
+        edges = [(0, 1), (0, 6), (1, 0), (1, 7), (6, 0), (6, 7), (7, 1), (7, 6)]
         # Score for capturing corners
         if (x, y) in corners:
-            score += 100
-        
+            score += 150
+        elif (x, y) in edges:
+            score += 50 
         # Score for mobility
-        score += self.calculate_mobility(board, color)
-        
+        score += 2 * self.calculate_mobility(board, color)
+        score += self.strategy_weight * self.calculate_mobility(board, color)
         # Score for flipping opponent's tiles
         flipping_score = len(board.get_flipped_tiles(x, y, color))
         score += flipping_score
@@ -453,15 +464,15 @@ def play_games(number_of_games):
             # First player logic goes here
             if othello_game.active_player == "⚫":
                 # User input for first player
-                move_coordinates = croto_bot.check_valid_moves(othello_board, othello_game)
+                move_coordinates = croto_bot.check_valid_moves(othello_board, othello_game) 
                 othello_game.place_pawn(
                     move_coordinates[0], move_coordinates[1], othello_board, othello_game.active_player)
 
             # Second player / bot logic goes here
             else:
                 # Bot logic for second player
-                move_coordinates =   otherBot.check_valid_moves(
-                    othello_board, othello_game.active_player)  
+                move_coordinates =  otherBot.check_valid_moves(
+                    othello_board, othello_game.active_player) 
                 othello_game.place_pawn(
                         move_coordinates[0],move_coordinates[1] , othello_board, othello_game.active_player)
             

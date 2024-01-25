@@ -321,13 +321,14 @@ class Bot:
     def evaluate_move(self, board, x, y, color):
         score = 0
         corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
-        
+        edges = [(0, 1), (0, 6), (1, 0), (1, 7), (6, 0), (6, 7), (7, 1), (7, 6)]
         # Score for capturing corners
         if (x, y) in corners:
-            score += 100
-        
+            score += 150
+        elif (x, y) in edges:
+            score += 50 
         # Score for mobility
-        score += self.calculate_mobility(board, color)
+        score += 2 * self.calculate_mobility(board, color)
         
         # Score for flipping opponent's tiles
         flipping_score = len(board.get_flipped_tiles(x, y, color))
@@ -453,15 +454,15 @@ def play_games(number_of_games):
             # First player logic goes here
             if othello_game.active_player == "⚫":
                 # User input for first player
-                move_coordinates = croto_bot.check_valid_moves(othello_board, othello_game)
+                move_coordinates = otherBot.check_valid_moves(
+                    othello_board, othello_game.active_player)
                 othello_game.place_pawn(
                     move_coordinates[0], move_coordinates[1], othello_board, othello_game.active_player)
 
             # Second player / bot logic goes here
             else:
                 # Bot logic for second player
-                move_coordinates =   otherBot.check_valid_moves(
-                    othello_board, othello_game.active_player)  
+                move_coordinates =  croto_bot.check_valid_moves(othello_board, othello_game) 
                 othello_game.place_pawn(
                         move_coordinates[0],move_coordinates[1] , othello_board, othello_game.active_player)
             
